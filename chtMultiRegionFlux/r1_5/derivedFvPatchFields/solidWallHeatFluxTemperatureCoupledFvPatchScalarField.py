@@ -88,7 +88,7 @@ class solidWallHeatFluxTemperatureCoupledFvPatchScalarField( fixedGradientFvPatc
         iF = args[ argc ]
         
         fixedGradientFvPatchScalarField.__init__( self, p, iF )
-        from Foam.applications.solvers.heatTransfer.r1_5.chtMultiRegionFoam import coupleManager
+        from chtMultiRegionFlux.r1_5 import coupleManager
         self.coupleManager_ = coupleManager( p )
         self.KName_ = word( "undefined-K" )
 
@@ -123,7 +123,7 @@ class solidWallHeatFluxTemperatureCoupledFvPatchScalarField( fixedGradientFvPatc
         dict_ = args[ argc ]
         
         fixedGradientFvPatchScalarField.__init__( self, p, iF )
-        from Foam.applications.solvers.heatTransfer.r1_5.chtMultiRegionFoam import coupleManager
+        from chtMultiRegionFlux.r1_5 import coupleManager
         self.coupleManager_ = coupleManager( p, dict_ )
         from Foam.OpenFOAM import word
         self.KName_ = word( dict_.lookup( word( "K" ) ) )
@@ -268,7 +268,7 @@ class solidWallHeatFluxTemperatureCoupledFvPatchScalarField( fixedGradientFvPatc
            
            from Foam.finiteVolume import volScalarField
            K = volScalarField.ext_lookupPatchField( self.patch(), self.KName_ )
-           from Foam.applications.solvers.heatTransfer.r1_5.chtMultiRegionFoam.derivedFvPatchFields import solidWallTemperatureCoupledFvPatchScalarField
+           from chtMultiRegionFlux.r1_5.derivedFvPatchFields import solidWallTemperatureCoupledFvPatchScalarField
            
            self.gradient().ext_assign( solidWallTemperatureCoupledFvPatchScalarField.ext_refCast( neighbourField ).flux() / K )
         
