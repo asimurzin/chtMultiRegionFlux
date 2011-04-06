@@ -23,4 +23,24 @@
 ##
 
 
-#-----------------------------------------------------------------
+#------------------------------------------------------------------------------------
+from Foam.OpenFOAM import IOdictionary
+class regionProperties( IOdictionary ):
+    def __init__( self, runTime ):
+        from Foam.OpenFOAM import IOobject, word, fileName
+        IOdictionary.__init__( self, IOobject( word( "regionProperties" ), 
+                                               fileName( runTime.time().constant() ), 
+                                               runTime.db(), 
+                                               IOobject.MUST_READ, 
+                                               IOobject.NO_WRITE  ) )
+        from Foam.OpenFOAM import List_word
+        self.fluidRegionNames = List_word( self.lookup( word( "fluidRegionNames" ) ) )
+        self.solidRegionNames = List_word( self.lookup( word( "solidRegionNames" ) ) )
+	pass
+	
+    pass
+
+
+#--------------------------------------------------------------------------------------
+
+
