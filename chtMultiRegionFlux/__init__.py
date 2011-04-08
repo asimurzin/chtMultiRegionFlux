@@ -36,7 +36,7 @@ def main_standalone():
 
     #----------------------------------------------------------------------------------
     if FOAM_VERSION( "==", "010500" ):
-       if len( argv ) > 1 and argv[ 1 ] == "-test":
+        if len( argv ) > 1 and argv[ 1 ] == "-test":
            argv = None
            test_dir= os.path.join( os.environ[ "PYFOAM_TESTING_DIR" ],'cases', 'r1.5', 'chtMultiRegionFoam', 'multiRegionHeater' )
            argv = [ __file__, "-case", test_dir ]
