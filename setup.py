@@ -46,7 +46,7 @@ setup( name = "chtMultiRegionFlux",
                        'Topic :: Scientific/Engineering'],
        packages = find_packages(),
        entry_points = { 'console_scripts': [
-           'chtMultiRegionFlux = chtMultiRegionFlux:main_standalone'] },
+           'chtMultiRegionFlux = chtMultiRegionFlux:entry_point'] },
        zip_safe = True )
 
 
