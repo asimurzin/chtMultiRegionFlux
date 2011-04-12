@@ -24,234 +24,120 @@
 
 
 #------------------------------------------------------------------------------------
-from Foam.OpenFOAM import IOdictionary
-class regionProperties( IOdictionary ):
-    def __init__( self, runTime ):
-        from Foam.OpenFOAM import IOobject, word, fileName
-        IOdictionary.__init__( self, IOobject( word( "regionProperties" ), 
-                                               fileName( runTime.time().constant() ), 
-                                               runTime.db(), 
-                                               IOobject.MUST_READ, 
-                                               IOobject.NO_WRITE  ) )
-        from Foam.OpenFOAM import List_word
-        self.fluidRegionNames = List_word( self.lookup( word( "fluidRegionNames" ) ) )
-        self.solidRegionNames = List_word( self.lookup( word( "solidRegionNames" ) ) )
-	pass
-	
-    pass
-
-
-#-------------------------------------------------------------------------------
-class coupleManager( object ):
-    def __init__( self, *args ):
-        try:
-            self._init__fvPatch( *args )
-            return
-        except AssertionError:
-            pass
-        except Exception:
-            import sys, traceback
-            traceback.print_exc( file = sys.stdout )
-            pass
-        
-        try:
-            self._init__fvPatch__dictionary( *args )
-            return
-        except AssertionError:
-            pass
-        except Exception:
-            import sys, traceback
-            traceback.print_exc( file = sys.stdout )
-            pass
-
-        try:
-            self._init__self( *args )
-            return
-        except AssertionError:
-            pass
-        except Exception:
-            import sys, traceback
-            traceback.print_exc( file = sys.stdout )
-            pass
-        
-        raise AssertionError()
-        pass
-
-
-#------------------------------
-    def  _init__fvPatch( self, *args ):
-        if len ( args) != 1 :
-           raise AssertionError( "len( args ) != 1" )
-        argc = 0
-
-        from Foam.finiteVolume import fvPatch
-        try:
-            fvPatch.ext_isinstance( args[ argc ] )
-        except TypeError:
-            raise AssertionError( "args[ argc ].__class__ != fvPatch" )
-        patch = args[ argc ]
-        
-        self.patch_ = patch
-        from Foam.OpenFOAM import word
-        self.neighbourRegionName_ = word( "undefined-neighbourRegionName" )
-        self.neighbourPatchName_ = word( "undefined-neighbourPatchName" )
-        self.neighbourFieldName_ = word( "undefined-neighbourFieldName" )
-        self.localRegion_ = self.patch_.boundaryMesh().mesh()
-        
-        return self
-        
-        
-#-------------------------------        
-    def _init__fvPatch__dictionary( self, *args ):
-        if len ( args ) != 2 :
-           raise AssertionError( "len( args ) != 1" )
-        argc = 0
-        
-        from Foam.finiteVolume import fvPatch
-        try:
-            fvPatch.ext_isinstance( args[ argc ] )
-        except TypeError:
-            raise AssertionError( "args[ argc ].__class__ != fvPatch" )
-        patch = args [ argc ]; argc = argc + 1
-        
-        from Foam.OpenFOAM import dictionary
-        try:
-            dictionary.ext_isinstance( args[ argc ] )
-        except TypeError:
-            raise AssertionError( "args[ argc ].__class__ != dictionary" )
-        dict_ = args[ argc ]
-        
-        self.patch_ = patch
-        from Foam.OpenFOAM import word
-        self.neighbourRegionName_ = word( dict_.lookup( word( "neighbourRegionName" ) ) )
-        self.neighbourPatchName_ = word( dict_.lookup( word( "neighbourPatchName" ) ) )
-        self.neighbourFieldName_ = word( dict_.lookup( word( "neighbourFieldName" ) ) )
-        self.localRegion_ = self.patch_.boundaryMesh().mesh()
-        
-        return self
-
-
-#------------------------------
-    def _init__self( self, *args ):
-        if len( args ) != 1 :
-            raise AssertionError( "len( args ) != 1" )
-        argc = 0
-
-        if args[ argc ].__class__ != self.__class__ :
-            raise AssertionError( "args[ argc ].__class__ != self.__class__" )
-        cm = args[ argc ]
-        
-        self.patch_ = cm.patch()
-        self.neighbourRegionName_ = cm.neighbourRegionName()
-        self.neighbourPatchName_ = cm.neighbourPatchName()
-        self.neighbourFieldName_ = cm.neighbourFieldName()
-        self.localRegion_ = self.patch_.boundaryMesh().mesh()
-        
-        return self
-
-
-#------------------------------
-    def checkCouple( self ):
-        from Foam.OpenFOAM import ext_Info, nl
-        ext_Info() << "neighbourRegionName_ = " << self.neighbourRegionName_ << nl
-        ext_Info() << "neighbourPatchName_ = " << neighbourPatchName_ << nl
-        ext_Info() << "neighbourFieldName_ = " << neighbourFieldName_ << nl
-        
-        nPatch = self.neighbourPatch()
-        
-        if self.patch_.size() != nPatch.size():
-           ext_Info() << "FATAL ERROR in" << "Foam::coupleManager::checkCouple()" << "Unequal patch sizes:" << nl \
-                      << "    patch name (size) = " << self.patch_.name() << "(" << self.patch_.size() << ")" << nl \
-                      << "    neighbour patch name (size) = " << nPatch.name() << "(" << self.patch_.size() << ")" << nl
-           import os 
-           os.abort()
-        pass
-
-
-#------------------------------
-    def coupleToObj( self ):
-        nPatch = self.neighbourPatch()
-        from Foam.OpenFOAM import OFstream
-        obj = OFstream( self.patch_.name() + "_to_" + nPatch.name() + word( "_couple.obj" ) )
-        
-        c1 = self.patch_.Cf()
-        c2 = self.neighbourPatch().Cf()
-        
-        from Foam.OpenFOAM import ext_Info, nl
-        if c1.size() != c2.size():
-           ext_Info() << "FATAL ERROR in" << "coupleManager::coupleToObj() const"<< "Coupled patches are of unequal size:" << nl \
-                      << "    patch0 = " << self.patch_.name() << "(" << patch_.size() <<  ")" << nl \
-                      << "    patch1 = " << nPatch.name() << "(" << nPatch.size() <<  ")" << nl
-           import os
-           os.abort()
-        
-        for i in range( c1.size):
-            obj << "v " << c1[i].x() << " " << c1[i].y() << " " << c1[i].z() << nl \
-                << "v " << c2[i].x() << " " << c2[i].y() << " " << c2[i].z() << nl \
-                << "l " << (2*i + 1) << " " << (2*i + 2) << nl
-            pass
-        
-        pass
-        
-
-#------------------------------
-    def writeEntries( self, os ):
-        from Foam.OpenFOAM import word, token, nl
-        
-        os.writeKeyword( word( "neighbourRegionName" ) )
-        os << self.neighbourRegionName_ << token( token.END_STATEMENT ) << nl
-        os.writeKeyword( word( "neighbourPatchName" ) )
-        os << self.neighbourPatchName_ << token( token.END_STATEMENT ) << nl
-        os.writeKeyword( word( "neighbourFieldName" ) )
-        os << self.neighbourFieldName_ << token( token.END_STATEMENT ) << nl
-         
-        pass
-
-
-#-------------------------------
-    def patch( self ):
-        return self.patch_
-
-
-#--------------------------------
-    def neighbourRegionName( self ):
-        return self.neighbourRegionName_
-
-
-#--------------------------------
-    def neighbourPatchName( self ):
-        return self.neighbourPatchName_
-
-
-#---------------------------------
-    def neighbourFieldName( self ):
-        return self.neighbourFieldName_
-
-
-#----------------------------------
-    def neighbourRegion( self ):
-        from Foam.finiteVolume import fvMesh
-        return fvMesh.ext_lookupObject( self.localRegion_.parent(), self.neighbourRegionName_ ) 
-        
-        
-#---------------------------------
-    def neighbourPatchID( self ):
-        return self.neighbourRegion().boundaryMesh().findPatchID( self.neighbourPatchName_ )
-
-
-#----------------------------------
-    def neighbourPatch( self ):
-        return self.neighbourRegion().boundary()[ self.neighbourPatchID() ]
-
-#----------------------------------
-    def neighbourPatchField( self, Type ):
-        from Foam.template import GeometricFieldTypeName
-        from Foam.finiteVolume import volMesh
-        an_expr = "from Foam.finiteVolume import %s" %GeometricFieldTypeName( Type, volMesh )
-        exec( an_expr )
-        an_expr = "res = %s.ext_lookupPatchField( self.neighbourPatch(), self.neighbourFieldName_ )" %GeometricFieldTypeName( Type, volMesh )
-        exec( an_expr )
-        return res
+from chtMultiRegionFlux.r1_5 import derivedFvPatchFields
 
 
 #--------------------------------------------------------------------------------------
+def main_standalone( argc, argv ):
+
+    from Foam.OpenFOAM.include import setRootCase
+    args = setRootCase( argc, argv )
+
+    from Foam.OpenFOAM.include import createTime
+    runTime = createTime( args )    
+    
+    from chtMultiRegionFlux.r1_5 import regionProperties
+    rp = regionProperties( runTime )
+
+    from chtMultiRegionFlux.r1_5.fluid import createFluidMeshes
+    fluidRegions = createFluidMeshes( rp, runTime )
+    
+    from chtMultiRegionFlux.r1_5.solid import createSolidMeshes
+    solidRegions = createSolidMeshes( rp, runTime )
+    from chtMultiRegionFlux.r1_5.fluid import createFluidFields
+    pdf, thermof, rhof, Kf, Uf, phif, turb, DpDtf, ghf, initialMassf, pRef = createFluidFields( fluidRegions, runTime, rp )
+    
+    from chtMultiRegionFlux.r1_5.solid import createSolidField
+    rhos, cps, rhosCps, Ks, Ts = createSolidField( solidRegions, runTime )
+    
+    from Foam.finiteVolume.cfdTools.general.include import initContinuityErrs
+    cumulativeContErr = initContinuityErrs()
+
+    from Foam.finiteVolume.cfdTools.general.include import readTimeControls
+    adjustTimeStep, maxCo, maxDeltaT = readTimeControls( runTime )
+    
+    if fluidRegions.size() :
+       from chtMultiRegionFlux.r1_5.fluid import compressubibleMultiRegionCourantNo
+       CoNum = compressubibleMultiRegionCourantNo( fluidRegions, runTime, rhof, phif )
+                
+       from chtMultiRegionFlux.r1_5.fluid import setInitialDeltaT
+       runTime = setInitialDeltaT( runTime, adjustTimeStep, maxCo, maxDeltaT, CoNum )
+       pass
+    
+    from Foam.OpenFOAM import ext_Info, nl
+    
+    while runTime.run():
+       from Foam.finiteVolume.cfdTools.general.include import readTimeControls
+       adjustTimeStep, maxCo, maxDeltaT = readTimeControls( runTime )
+       
+       if fluidRegions.size() :
+          from chtMultiRegionFlux.r1_5.fluid import compressubibleMultiRegionCourantNo
+          CoNum = compressubibleMultiRegionCourantNo( fluidRegions, runTime, rhof, phif )
+
+          from Foam.finiteVolume.cfdTools.general.include import setDeltaT   
+          runTime = setDeltaT( runTime, adjustTimeStep, maxCo, maxDeltaT, CoNum )
+          pass
+       
+       runTime.increment()
+       ext_Info()<< "Time = " << runTime.timeName() << nl << nl
+       
+       for i in range( fluidRegions.size() ):
+           ext_Info() << "\nSolving for fluid region " << fluidRegions[ i ].name() << nl
+           
+           from chtMultiRegionFlux.r1_5.fluid import readFluidMultiRegionPISOControls
+           piso, nCorr, nNonOrthCorr, momentumPredictor, transonic, nOuterCorr = readFluidMultiRegionPISOControls( fluidRegions[ i ] )
+
+           from chtMultiRegionFlux.r1_5.fluid import solveFluid
+           cumulativeContErr = solveFluid( i, fluidRegions, pdf, thermof, rhof, Kf, Uf, phif, turb, DpDtf, ghf, initialMassf, pRef,\
+                                           nCorr, nNonOrthCorr, momentumPredictor, transonic, nOuterCorr, cumulativeContErr )
+           
+           pass
+        
+       for i in range( solidRegions.size() ):
+           ext_Info() << "\nSolving for solid region " << solidRegions[ i ].name() << nl
+           
+           from chtMultiRegionFlux.r1_5.solid import readSolidMultiRegionPISOControls
+           piso, nNonOrthCorr = readSolidMultiRegionPISOControls( solidRegions[ i ] )
+               
+           from chtMultiRegionFlux.r1_5.solid import solveSolid
+           solveSolid( i, rhosCps,  Ks, Ts, nNonOrthCorr )
+           pass
+       
+       runTime.write();
+
+       ext_Info() << "ExecutionTime = " << runTime.elapsedCpuTime() << " s" \
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s" \
+            << nl << nl
+       
+
+    ext_Info() << "End\n"
+    pass
+
+       
+    import os
+    return os.EX_OK
+
+    
+#--------------------------------------------------------------------------------------
+argv = None
+import sys, os
+
+from Foam import FOAM_VERSION
+if FOAM_VERSION( "==", "010500" ):
+    if __name__ == "__main__" :
+        argv = sys.argv
+        
+        if len(argv) > 1 and argv[ 1 ] == "-test":
+           argv = None
+           test_dir= os.path.join( os.environ[ "PYFOAM_TESTING_DIR" ],'cases', 'local', 'r1.5', 'chtMultiRegionFoam', 'multiRegionHeater' )
+           argv = [ __file__, "-case", test_dir ]
+           pass
+        
+        os._exit( main_standalone( len( argv ), argv ) )
+        
+        pass
+else:
+    from Foam.OpenFOAM import ext_Info
+    ext_Info() << "\n\n To use this solver, it is necessary to SWIG OpenFOAM-1.5 \n"    
+    pass
+
