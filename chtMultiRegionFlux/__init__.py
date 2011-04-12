@@ -49,31 +49,31 @@ if FOAM_VERSION( "<=", "010401" ):
 
 #--------------------------------------------------------------------------------------
 if FOAM_VERSION( "==", "010500" ):
-    from chtMultiRegionFlux.r1_5.solver import *
+    from chtMultiRegionFlux.r1_5 import *
     pass
     
 
 #--------------------------------------------------------------------------------------
 if FOAM_REF_VERSION( '==', "010600" ):
-    from chtMultiRegionFlux.r1_6.solver import *
+    from chtMultiRegionFlux.r1_6 import *
     pass
 
 
 #--------------------------------------------------------------------------------------
 if FOAM_BRANCH_VERSION( "dev", '>=', "010600" ):
-    from chtMultiRegionFlux.r1_6_dev.solver import *
+    from chtMultiRegionFlux.r1_6_dev import *
     pass
 
 
 #--------------------------------------------------------------------------------------
 if FOAM_REF_VERSION( '==', "010700" ):
-    from chtMultiRegionFlux.r1_7_0.solver import *
+    from chtMultiRegionFlux.r1_7_0 import *
     pass
 
 
 #--------------------------------------------------------------------------------------
 if FOAM_REF_VERSION( '>=', "010701" ):
-    from chtMultiRegionFlux.r1_7_1.solver import *
+    from chtMultiRegionFlux.r1_7_1 import *
     pass
 
 
