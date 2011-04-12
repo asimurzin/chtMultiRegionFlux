@@ -26,7 +26,6 @@
 
 #--------------------------------------------------------------------------------------
 from setuptools import setup, find_packages
-import chtMultiRegionFlux
 
 setup( name = "chtMultiRegionFlux",
        description = 'Python front-end of the chtMultiRegionFoam',
