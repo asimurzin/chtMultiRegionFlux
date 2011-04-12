@@ -250,7 +250,7 @@ class solidWallMixedTemperatureCoupledFvPatchScalarField( mixedFvPatchScalarFiel
         myRegion = self.patch().boundaryMesh().mesh()
 
         from Foam.OpenFOAM import word
-        from chtMultiRegionFlux.r1_6 import regionProperties
+        from chtMultiRegionFlux.r1_6.regionProperties import regionProperties
         props = regionProperties.ext_lookupObject( myRegion.parent(), word( "regionProperties" ) )
 
         myIndex = props.fluidRegionNames.ext_findIndex( myRegion.name() )

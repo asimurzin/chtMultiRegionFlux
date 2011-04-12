@@ -26,7 +26,7 @@
 #------------------------------------------------------------------------------------
 # To import corresponding plugin first
 #from Foam.applications.solvers.heatTransfer.chtMultiRegionFoam import plugin
-from chtMultiRegionFlux.r1_6 import derivedFvPatchFields
+import derivedFvPatchFields
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,23 +51,23 @@ def main_standalone( argc, argv ):
     from Foam.OpenFOAM.include import createTime
     runTime = createTime( args )
     
-    from chtMultiRegionFlux.r1_6 import regionProperties
+    from regionProperties import regionProperties
     rp = regionProperties( runTime )
     
-    from chtMultiRegionFlux.r1_6.fluid import createFluidMeshes
+    from fluid import createFluidMeshes
     fluidRegions = createFluidMeshes( rp, runTime )
 
-    from chtMultiRegionFlux.r1_6.solid import createSolidMeshes,createSolidField
+    from solid import createSolidMeshes,createSolidField
     solidRegions=createSolidMeshes( rp,runTime )
 
-    from chtMultiRegionFlux.r1_6.fluid import createFluidFields
+    from fluid import createFluidFields
 
     thermoFluid, rhoFluid, KFluid, UFluid, phiFluid, gFluid, turbulence, DpDtFluid, initialMassFluid = createFluidFields( fluidRegions, runTime )
 
-    from chtMultiRegionFlux.r1_6.solid import createSolidField
+    from solid import createSolidField
     rhos, cps, rhosCps, Ks, Ts = createSolidField( solidRegions, runTime )
     
-    from chtMultiRegionFlux.r1_6.fluid import initContinuityErrs
+    from fluid import initContinuityErrs
     cumulativeContErr = initContinuityErrs( fluidRegions.size() )
     
     from Foam.finiteVolume.cfdTools.general.include import readTimeControls
@@ -76,7 +76,7 @@ def main_standalone( argc, argv ):
     from Foam.OpenFOAM import ext_Info, nl
 
     if fluidRegions.size() :
-        from chtMultiRegionFlux.r1_6.fluid import compressubibleMultiRegionCourantNo
+        from fluid import compressubibleMultiRegionCourantNo
         CoNum = compressubibleMultiRegionCourantNo( fluidRegions, runTime, rhoFluid, phiFluid )
                 
         from Foam.finiteVolume.cfdTools.general.include import setInitialDeltaT
@@ -89,7 +89,7 @@ def main_standalone( argc, argv ):
         nOuterCorr = readPIMPLEControls( runTime )
         
         if fluidRegions.size() :
-            from chtMultiRegionFlux.r1_6.fluid import compressubibleMultiRegionCourantNo
+            from fluid import compressubibleMultiRegionCourantNo
             CoNum = compressubibleMultiRegionCourantNo( fluidRegions, runTime, rhoFluid, phiFluid )
 
             from Foam.finiteVolume.cfdTools.general.include import setDeltaT   
@@ -101,12 +101,12 @@ def main_standalone( argc, argv ):
                 
         if nOuterCorr != 1 :
             for i in range( fluidRegions.size() ):
-                from chtMultiRegionFlux.r1_6.fluid import setRegionFluidFields
+                from fluid import setRegionFluidFields
                 mesh, thermo, rho, K, U, phi, g, turb, DpDt, p, psi, h, massIni = \
                       setRegionFluidFields( i, fluidRegions, thermoFluid, rhoFluid, KFluid, UFluid, \
                                             phiFluid, gFluid, turbulence, DpDtFluid, initialMassFluid )
                 
-                from chtMultiRegionFlux.r1_6.fluid import storeOldFluidFields
+                from fluid import storeOldFluidFields
                 storeOldFluidFields( p, rho )
                 pass
             pass
@@ -116,15 +116,15 @@ def main_standalone( argc, argv ):
             for i in range( fluidRegions.size() ):
                 ext_Info() << "\nSolving for fluid region " << fluidRegions[ i ].name() << nl
 
-                from chtMultiRegionFlux.r1_6.fluid import setRegionFluidFields
+                from fluid import setRegionFluidFields
                 mesh, thermo, rho, K, U, phi, g, turb, DpDt, p, psi, h, massIni = \
                       setRegionFluidFields( i, fluidRegions, thermoFluid, rhoFluid, KFluid, UFluid, \
                                             phiFluid, gFluid, turbulence, DpDtFluid, initialMassFluid )
                 
-                from chtMultiRegionFlux.r1_6.fluid import readFluidMultiRegionPIMPLEControls
+                from fluid import readFluidMultiRegionPIMPLEControls
                 pimple, nCorr, nNonOrthCorr, momentumPredictor = readFluidMultiRegionPIMPLEControls( mesh ) 
                 
-                from chtMultiRegionFlux.r1_6.fluid import solveFluid
+                from fluid import solveFluid
                 cumulativeContErr = solveFluid( i, mesh, thermo, thermoFluid, rho, K, U, phi, g, h, turb, DpDt, p, psi, \
                                                 massIni, oCorr, nCorr, nOuterCorr, nNonOrthCorr, momentumPredictor, cumulativeContErr )
                 
@@ -133,13 +133,13 @@ def main_standalone( argc, argv ):
             for i in range( solidRegions.size() ):
                ext_Info() << "\nSolving for solid region " << solidRegions[ i ].name() << nl
                
-               from chtMultiRegionFlux.r1_6.solid import setRegionSolidFields
+               from solid import setRegionSolidFields
                mesh, rho, cp, K, T = setRegionSolidFields( i, solidRegions, rhos, cps, Ks, Ts )
                
-               from chtMultiRegionFlux.r1_6.solid import readSolidMultiRegionPIMPLEControls
+               from solid import readSolidMultiRegionPIMPLEControls
                pimple, nNonOrthCorr = readSolidMultiRegionPIMPLEControls( mesh )
                
-               from chtMultiRegionFlux.r1_6.solid import solveSolid
+               from solid import solveSolid
                solveSolid( mesh, rho, cp, K, T, nNonOrthCorr )
                pass                
             pass
