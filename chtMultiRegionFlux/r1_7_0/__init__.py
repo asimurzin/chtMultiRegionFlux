@@ -26,7 +26,7 @@
 #------------------------------------------------------------------------------------
 # To import corresponding plugin first
 #from Foam.applications.solvers.heatTransfer.chtMultiRegionFoam import plugin
-from chtMultiRegionFlux.r1_7_0 import derivedFvPatchFields
+import derivedFvPatchFields
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -94,33 +94,33 @@ def main_standalone( argc, argv ):
     from Foam.compressible import regionProperties
     rp = regionProperties( runTime )
     
-    from chtMultiRegionFlux.r1_7_0.fluid import createFluidMeshes
+    from fluid import createFluidMeshes
     fluidRegions = createFluidMeshes( rp, runTime )
 
-    from chtMultiRegionFlux.r1_7_0.solid import createSolidMeshes,createSolidField
+    from solid import createSolidMeshes,createSolidField
     solidRegions=createSolidMeshes( rp,runTime )
 
-    from chtMultiRegionFlux.r1_7_0.fluid import createFluidFields
+    from fluid import createFluidFields
 
     thermoFluid, rhoFluid, KFluid, UFluid, phiFluid, gFluid, turbulence, DpDtFluid, \
                            initialMassFluid, ghFluid, ghfFluid, p_rghFluid = createFluidFields( fluidRegions, runTime )
 
-    from chtMultiRegionFlux.r1_7_0.solid import createSolidField
+    from solid import createSolidField
     rhos, cps, rhosCps, Ks, Ts = createSolidField( solidRegions, runTime )
     
-    from chtMultiRegionFlux.r1_7_0.fluid import initContinuityErrs
+    from fluid import initContinuityErrs
     cumulativeContErr = initContinuityErrs( fluidRegions.size() )
     
     from Foam.finiteVolume.cfdTools.general.include import readTimeControls
     adjustTimeStep, maxCo, maxDeltaT = readTimeControls( runTime )
     
-    from chtMultiRegionFlux.r1_7_0.solid import readSolidTimeControls
+    from solid import readSolidTimeControls
     maxDi= readSolidTimeControls( runTime )
     
-    from chtMultiRegionFlux.r1_7_0.fluid import compressubibleMultiRegionCourantNo
+    from fluid import compressubibleMultiRegionCourantNo
     CoNum = compressubibleMultiRegionCourantNo( fluidRegions, runTime, rhoFluid, phiFluid )
     
-    from chtMultiRegionFlux.r1_7_0.solid import solidRegionDiffusionNo
+    from solid import solidRegionDiffusionNo
     DiNum = solidRegionDiffusionNo( solidRegions, runTime, rhosCps, Ks )
     
     runTime, CoNum, DiNum = setInitialMultiRegionDeltaT( adjustTimeStep, runTime, CoNum, DiNum, maxCo, maxDi, maxDeltaT )
@@ -133,7 +133,7 @@ def main_standalone( argc, argv ):
         
         nOuterCorr = readPIMPLEControls( runTime )
         
-        from chtMultiRegionFlux.r1_7_0.fluid import compressubibleMultiRegionCourantNo
+        from fluid import compressubibleMultiRegionCourantNo
         CoNum = compressubibleMultiRegionCourantNo( fluidRegions, runTime, rhoFluid, phiFluid )
 
         DiNum = solidRegionDiffusionNo( solidRegions, runTime, rhosCps, Ks )
@@ -146,12 +146,12 @@ def main_standalone( argc, argv ):
                 
         if nOuterCorr != 1 :
             for i in range( fluidRegions.size() ):
-                from chtMultiRegionFlux.r1_7_0.fluid import setRegionFluidFields
+                from fluid import setRegionFluidFields
                 mesh, thermo, rho, K, U, phi, turb, DpDt, p, psi, h, initialMass, p_rgh, gh, ghf = \
                                      setRegionFluidFields( i, fluidRegions, thermoFluid, rhoFluid, KFluid, UFluid, \
                                                            phiFluid, turbulence, DpDtFluid, initialMassFluid, ghFluid, ghfFluid, p_rghFluid )
                 
-                from chtMultiRegionFlux.r1_7_0.fluid import storeOldFluidFields
+                from fluid import storeOldFluidFields
                 storeOldFluidFields( p, rho )
                 pass
             pass
@@ -161,15 +161,15 @@ def main_standalone( argc, argv ):
             for i in range( fluidRegions.size() ):
                 ext_Info() << "\nSolving for fluid region " << fluidRegions[ i ].name() << nl
 
-                from chtMultiRegionFlux.r1_7_0.fluid import setRegionFluidFields
+                from fluid import setRegionFluidFields
                 mesh, thermo, rho, K, U, phi, turb, DpDt, p, psi, h, initialMass, p_rgh, gh, ghf = \
                       setRegionFluidFields( i, fluidRegions, thermoFluid, rhoFluid, KFluid, UFluid, \
                                             phiFluid, turbulence, DpDtFluid, initialMassFluid, ghFluid, ghfFluid, p_rghFluid )
                 
-                from chtMultiRegionFlux.r1_7_0.fluid import readFluidMultiRegionPIMPLEControls
+                from fluid import readFluidMultiRegionPIMPLEControls
                 pimple, nCorr, nNonOrthCorr, momentumPredictor = readFluidMultiRegionPIMPLEControls( mesh ) 
                 
-                from chtMultiRegionFlux.r1_7_0.fluid import solveFluid
+                from fluid import solveFluid
                 cumulativeContErr = solveFluid( i, mesh, thermo, thermoFluid, rho, K, U, phi, h, turb, DpDt, p, psi, \
                                                 initialMass, p_rgh, gh, ghf, oCorr, nCorr, nOuterCorr, nNonOrthCorr, momentumPredictor, cumulativeContErr )
                 
@@ -178,13 +178,13 @@ def main_standalone( argc, argv ):
             for i in range( solidRegions.size() ):
                ext_Info() << "\nSolving for solid region " << solidRegions[ i ].name() << nl
                
-               from chtMultiRegionFlux.r1_7_0.solid import setRegionSolidFields
+               from solid import setRegionSolidFields
                mesh, rho, cp, K, T = setRegionSolidFields( i, solidRegions, rhos, cps, Ks, Ts )
                
-               from chtMultiRegionFlux.r1_7_0.solid import readSolidMultiRegionPIMPLEControls
+               from solid import readSolidMultiRegionPIMPLEControls
                pimple, nNonOrthCorr = readSolidMultiRegionPIMPLEControls( mesh )
                
-               from chtMultiRegionFlux.r1_7_0.solid import solveSolid
+               from solid import solveSolid
                solveSolid( mesh, rho, cp, K, T, nNonOrthCorr )
                pass                
             pass
