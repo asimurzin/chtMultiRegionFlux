@@ -24,10 +24,6 @@
 
 
 #--------------------------------------------------------------------------------------
-argv = None
-import sys, os
-
-#--------------------------------------------------------------------------------------
 from Foam import FOAM_VERSION, FOAM_REF_VERSION, FOAM_BRANCH_VERSION
 if FOAM_VERSION( "==", "010500" ):
     from chtMultiRegionFlux.r1_5 import *
