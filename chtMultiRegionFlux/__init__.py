@@ -60,13 +60,12 @@ if FOAM_REF_VERSION( '>=', "010701" ):
 
 #--------------------------------------------------------------------------------------
 def entry_point():
-    import sys; argv = sys.argv
     try:
+       import sys; argv = sys.argv
        return main_standalone( len( argv ), argv )
     except NameError:
-       import os; foam_version = os.getenv( "WM_PROJECT_VERSION" )
        print
-       print "There is no implementation of this solver for the OpenFOAM-%s" % foam_version
+       print "There is no implementation of the current OpenFOAM version"
        print
        pass
 
