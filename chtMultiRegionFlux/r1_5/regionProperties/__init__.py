@@ -34,9 +34,9 @@ class regionProperties( IOdictionary ):
                                                runTime.db(), 
                                                IOobject.MUST_READ, 
                                                IOobject.NO_WRITE  ) )
-        from Foam.OpenFOAM import List_word
-        self.fluidRegionNames = List_word( self.lookup( word( "fluidRegionNames" ) ) )
-        self.solidRegionNames = List_word( self.lookup( word( "solidRegionNames" ) ) )
+        from Foam.OpenFOAM import wordList
+        self.fluidRegionNames = wordList( self.lookup( word( "fluidRegionNames" ) ) )
+        self.solidRegionNames = wordList( self.lookup( word( "solidRegionNames" ) ) )
 	pass
 	
     pass
