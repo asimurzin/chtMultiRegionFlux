@@ -192,13 +192,13 @@ def main_standalone( argc, argv ):
 argv = None
 import sys, os
 from Foam import FOAM_VERSION
-if FOAM_VERSION( ">=", "020000" ):
+if FOAM_VERSION( ">=", "020100" ):
     if __name__ == "__main__" :
         argv = sys.argv
         os._exit( main_standalone( len( argv ), argv ) )
         pass
 else:
-    ref.ext_Info() << "\n\n To use this solver, it is necessary to SWIG OpenFOAM-2.0.0 or higher \n"    
+    ref.ext_Info() << "\n\n To use this solver, it is necessary to SWIG OpenFOAM-2.1.0 or higher \n"    
     pass
 
 
