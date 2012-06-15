@@ -25,10 +25,6 @@
 
 
 #------------------------------------------------------------------------------------
-import derivedFvPatchFields
-
-
-#--------------------------------------------------------------------------------------
 def main_standalone( argc, argv ):
 
     from Foam.OpenFOAM.include import setRootCase
@@ -45,6 +41,7 @@ def main_standalone( argc, argv ):
     
     from solid import createSolidMeshes
     solidRegions = createSolidMeshes( rp, runTime )
+    
     from fluid import createFluidFields
     pdf, thermof, rhof, Kf, Uf, phif, turb, DpDtf, ghf, initialMassf, pRef = createFluidFields( fluidRegions, runTime, rp )
     

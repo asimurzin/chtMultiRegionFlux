@@ -25,12 +25,6 @@
 
 
 #------------------------------------------------------------------------------------
-# To import corresponding plugin first
-#from Foam.applications.solvers.heatTransfer.chtMultiRegionFoam import plugin
-import derivedFvPatchFields
-
-
-#------------------------------------------------------------------------------------
 def readPIMPLEControls( runTime ):
 
     from Foam.finiteVolume import fvSolution

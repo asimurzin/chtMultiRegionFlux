@@ -47,6 +47,9 @@ def createFluidMeshes( rp, runTime ) :
     
 #-------------------------------------------------------------------
 def createFluidFields( fluidRegions, runTime ) :
+
+    # Load boundary conditions
+    import derivedFvPatchFields
     
     # Initialise fluid field pointer lists
     from Foam.finiteVolume import PtrList_volScalarField

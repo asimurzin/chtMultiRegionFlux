@@ -303,7 +303,7 @@ class solidWallHeatFluxTemperatureCoupledFvPatchScalarField( fixedGradientFvPatc
 from Foam.template import getfvPatchFieldConstructorToTableBase_scalar
 class fvPatchFieldConstructorToTable_solidWallHeatFluxTemperatureCoupled( getfvPatchFieldConstructorToTableBase_scalar() ):
     def __init__( self ):
-        aBaseClass = getfvPatchFieldConstructorToTableBase_scalar()
+        aBaseClass = self.__class__.__mro__[ 1 ]
         aBaseClass.__init__( self )
 
         from Foam.OpenFOAM import word 
