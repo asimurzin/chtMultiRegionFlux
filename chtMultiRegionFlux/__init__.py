@@ -50,19 +50,19 @@ if FOAM_REF_VERSION( '==', "010700" ):
 
 
 #--------------------------------------------------------------------------------------
-if FOAM_REF_VERSION( '>=', "010701" ):
+if FOAM_REF_VERSION( '==', "010701" ) :
     from chtMultiRegionFlux.r1_7_1 import *
     pass
 
 
 #--------------------------------------------------------------------------------------
-if FOAM_VERSION( '>=', "020000" ):
+if FOAM_VERSION( '==', "020000" ) or FOAM_REF_VERSION( "==", "020001" ):
     from chtMultiRegionFlux.r2_0_0 import *
     pass
 
 
 #--------------------------------------------------------------------------------------
-if FOAM_VERSION( '>=', "020100" ):
+if FOAM_VERSION( '==', "020100" ):
     from chtMultiRegionFlux.r2_1_0 import *
     pass
 
