@@ -63,7 +63,7 @@ def createFluidMeshes( rp, runTime ) :
 def createFluidFields( fluidRegions, runTime, rp ) :
     
     # Load boundary Fields
-     from chtMultiRegionFlux.r1_5 import derivedFvPatchFields
+     from .. import derivedFvPatchFields
     
     # Initialise fluid field pointer lists
     from Foam.thermophysicalModels import PtrList_basicThermo
